@@ -1,5 +1,7 @@
-p_input: str = """
-74 76 78 79 76
+from warnings import warn
+
+
+p_input: str = """74 76 78 79 76
 38 40 43 44 44
 1 2 4 6 8 9 13
 65 68 70 72 75 76 81
@@ -1002,14 +1004,44 @@ p_input: str = """
 """
 
 
-def multiline_str_to_list(multiline_str: str) -> list[list[str]]:
+def multiline_str_to_list(multiline_str: str) -> list[list[int]]:
     lines: list[str] = multiline_str.splitlines()
     lines_lists: list[list[str]] = list(map(lambda line: line.split(" "), lines))
-    return lines_lists
+    lines_ints = [list(map(lambda s: int(s), line)) for line in lines_lists]
+    return lines_ints
+
+
+def check_safety(seq: list[int]) -> bool:
+    sorted_seq: list[int] = seq.copy()
+    sorted_rev_seq: list[int] = seq.copy()
+    sorted_seq.sort()
+    sorted_rev_seq.sort(reverse=True)
+
+    # check for all increase or decrease
+    safe_order: bool = True if seq == sorted_seq or seq == sorted_rev_seq else False
+
+    # check for difference between each element
+    acceptable_diffs: tuple[int, ...] = tuple(range(1, 4))
+    safe_diff: bool = True
+    for i in range(len(seq) - 1):
+        diff: int = abs(seq[i] - seq[i + 1])
+        if diff in acceptable_diffs:
+            continue
+        else:
+            safe_diff = False
+            break
+    return safe_order and safe_diff
 
 
 def main() -> None:
-    lists_input: list[list[str]] = multiline_str_to_list(p_input)
+    lists_input: list[list[int]] = multiline_str_to_list(p_input)
+
+    safe_reports: int = 0
+    for sequence in lists_input:
+        safe: bool = check_safety(sequence)
+        safe_reports += 1 if safe else 0
+
+    print(f"Counted {safe_reports} in the input.")
 
 
 if __name__ == "__main__":
